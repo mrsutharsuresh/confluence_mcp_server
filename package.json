@@ -1,0 +1,122 @@
+{
+  "name": "confluence-mcp",
+  "displayName": "Confluence MCP",
+  "description": "Connect any AI assistant to Confluence via MCP. Search, read, create and update pages directly from your AI chat without leaving VS Code.",
+  "version": "1.0.0",
+  "publisher": "SutharLabs",
+  "author": "Suresh Suthar <mr.sutharsuresh@gmail.com>",
+  "engines": {
+    "vscode": "^1.99.0"
+  },
+  "categories": [
+    "AI",
+    "Other"
+  ],
+  "keywords": [
+    "confluence",
+    "mcp",
+    "copilot",
+    "ai",
+    "model-context-protocol",
+    "wiki",
+    "atlassian"
+  ],
+  "icon": "icon.png",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/mrsutharsuresh/confluence_mcp_server.git"
+  },
+  "main": "./dist/extension.js",
+  "contributes": {
+    "mcpServerDefinitionProviders": [
+      {
+        "id": "confluence-copilot-mcp",
+        "label": "Confluence MCP"
+      }
+    ],
+    "configuration": {
+      "title": "Confluence MCP",
+      "properties": {
+        "confluence-copilot-mcp.confluenceUrl": {
+          "type": "string",
+          "default": "",
+          "description": "Confluence server URL (e.g. https://confluence.example.com or https://yourcompany.atlassian.net/wiki)",
+          "order": 1
+        },
+        "confluence-copilot-mcp.username": {
+          "type": "string",
+          "default": "",
+          "description": "Your Confluence username or email address (required for Cloud basic-auth mode)",
+          "order": 2
+        },
+        "confluence-copilot-mcp.authMode": {
+          "type": "string",
+          "enum": ["bearer", "basic"],
+          "enumDescriptions": [
+            "Bearer token (PAT) — for Confluence Server / Data Center",
+            "Basic auth (email + API token) — for Confluence Cloud"
+          ],
+          "default": "bearer",
+          "description": "Authentication mode: 'bearer' for Server/DC PAT, 'basic' for Cloud API token",
+          "order": 3
+        },
+        "confluence-copilot-mcp.instanceType": {
+          "type": "string",
+          "enum": ["cloud", "server"],
+          "enumDescriptions": [
+            "Confluence Cloud (atlassian.net) — uses REST API v2 for pages/spaces/comments/attachments",
+            "Confluence Server or Data Center — uses REST API v1 for all operations"
+          ],
+          "default": "cloud",
+          "description": "Confluence instance type. Cloud uses the modern REST API v2; Server/DC uses v1.",
+          "order": 4
+        }
+      }
+    },
+    "commands": [
+      {
+        "command": "confluence-copilot-mcp.configure",
+        "title": "Configure Confluence Connection",
+        "category": "Confluence MCP"
+      },
+      {
+        "command": "confluence-copilot-mcp.clearCredentials",
+        "title": "Clear Saved Credentials",
+        "category": "Confluence MCP"
+      },
+      {
+        "command": "confluence-copilot-mcp.testConnection",
+        "title": "Test Confluence Connection",
+        "category": "Confluence MCP"
+      },
+      {
+        "command": "confluence-copilot-mcp.getToken",
+        "title": "Get Confluence Token (Internal)",
+        "category": "Confluence MCP"
+      }
+    ]
+  },
+  "activationEvents": [
+    "onStartupFinished"
+  ],
+  "scripts": {
+    "build": "node esbuild.mjs",
+    "watch": "node esbuild.mjs --watch",
+    "package": "vsce package --no-dependencies",
+    "lint": "eslint src --ext ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "@types/vscode": "^1.99.0",
+    "@vscode/vsce": "^3.0.0",
+    "esbuild": "^0.25.0",
+    "typescript": "^5.4.0"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.10.0",
+    "axios": "^1.6.0",
+    "zod": "^3.22.0"
+  }
+}

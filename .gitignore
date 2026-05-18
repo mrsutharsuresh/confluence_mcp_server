@@ -1,0 +1,48 @@
+# ── Build outputs ─────────────────────────────────────────────────────────────
+dist/
+out/
+*.js.map
+
+# ── Packaged extension ────────────────────────────────────────────────────────
+*.vsix
+
+# ── Dependencies ──────────────────────────────────────────────────────────────
+node_modules/
+
+# ── TypeScript cache ──────────────────────────────────────────────────────────
+*.tsbuildinfo
+tsconfig.tsbuildinfo
+
+# ── Environment / secrets ─────────────────────────────────────────────────────
+.env
+.env.*
+*.pem
+*.key
+
+# ── OS artefacts ──────────────────────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ── Editor artefacts ──────────────────────────────────────────────────────────
+.vscode/settings.json
+.vscode/launch.json
+.vscode/tasks.json
+.vscode/*.code-workspace
+.idea/
+*.swp
+*.swo
+
+# ── Test & coverage ───────────────────────────────────────────────────────────
+coverage/
+.nyc_output/
+*.lcov
+
+# ── Logs ──────────────────────────────────────────────────────────────────────
+*.log
+npm-debug.log*
+yarn-error.log*
+
+# ── Temp / scratch ────────────────────────────────────────────────────────────
+tmp/
+temp/

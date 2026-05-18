@@ -1,0 +1,17 @@
+# Source & tooling — not needed in packaged extension
+.vscode/**
+.vscode-test/**
+node_modules/**
+src/**
+scaffold-*.js
+setup.js
+esbuild.mjs
+tsconfig.json
+.gitignore
+.vscodeignore
+**/*.map
+**/*.ts
+
+# Docs & assets not needed at runtime
+CHANGELOG.md
+CONTRIBUTING.md
