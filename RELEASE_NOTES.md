@@ -1,10 +1,25 @@
-# Confluence MCP — v1.0.0 Release Notes
+# Confluence MCP — Release Notes
+
+## 🆕 What's New in v1.0.1 (Latest)
+
+### 🐛 Linux / Remote Environment Startup Fixes
+- **Robust Execution Engine**: Changed the internal process runner command from the generic system `"node"` command to programmatically resolve **`process.execPath`**. This guarantees that the Confluence MCP server subprocess is spawned using the identical modern Node.js engine running the VS Code Extension Host (or VS Code Server), completely preventing startup crashes on remote machines with legacy or missing system-wide Node versions (e.g. `SyntaxError: Unexpected token ...` on Node v4/v6).
+
+### 🚀 Automatic Synchronization to VS Code Forks & Clients
+- **Direct Integration for Alternative Clients**: Added full automatic configuration synchronization. When the extension activates or when credentials are saved, it will automatically register the Confluence MCP server under the active tools list in popular VS Code forks and external engines by directly writing to their respective local settings configurations:
+  - **Antigravity**
+  - **KIRO**
+  - **Cursor**
+  - **Claude Desktop**
+  This completely removes the need to manually configure environment variables or configure command line args in your forks!
+
+---
+
+## 🎉 Initial Release v1.0.0
 
 We are thrilled to announce the initial release of **Confluence MCP (v1.0.0)**, a secure, high-performance extension that connects your favorite AI assistants (such as GitHub Copilot, Claude, and other MCP-compatible clients) directly to Confluence. 
 
 This release empowers you to search, read, create, and update wiki pages and comments seamlessly within VS Code using standard English instructions in your AI chat.
-
----
 
 ## 🚀 Key Features
 
