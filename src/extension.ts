@@ -320,7 +320,7 @@ export function activate(context: vscode.ExtensionContext): void {
         return [
           new vscode.McpStdioServerDefinition(
             DISPLAY,
-            "node",
+            process.execPath,
             [serverPath],
             {
               CONFLUENCE_URL:           url,
