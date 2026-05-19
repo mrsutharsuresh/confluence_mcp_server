@@ -1,5 +1,8 @@
 import * as vscode from "vscode";
 import axios, { type AxiosRequestConfig } from "axios";
+import * as fs from "fs";
+import * as path from "path";
+import * as os from "os";
 
 const SECRET_KEY = "confluence-copilot-mcp.pat";
 const CFG        = "confluence-copilot-mcp";
@@ -196,6 +199,7 @@ async function promptForToken(
   if (authMode)     await config.update("authMode",     authMode,     vscode.ConfigurationTarget.Global);
   if (username)     await config.update("username",     username,     vscode.ConfigurationTarget.Global);
   await context.secrets.store(SECRET_KEY, pat.trim());
+  void syncForkConfigs(context, pat.trim());
 
   log(`Credentials saved — ${url} (${instanceType ?? cfg("instanceType")}, ${resolvedAuth})`);
   mcpChangeEmitter.fire();
@@ -204,6 +208,7 @@ async function promptForToken(
 
 async function runClearCredentials(context: vscode.ExtensionContext): Promise<void> {
   await context.secrets.delete(SECRET_KEY);
+  void syncForkConfigs(context, undefined);
   log("Credentials cleared.");
   mcpChangeEmitter.fire();
   await updateStatusBar(context, false);
@@ -290,6 +295,12 @@ export function activate(context: vscode.ExtensionContext): void {
   log(`VS Code version : ${vscode.version}`);
   log(`Platform        : ${process.platform} / Node ${process.version}`);
 
+  context.secrets.get(SECRET_KEY).then((token) => {
+    if (token) {
+      void syncForkConfigs(context, token);
+    }
+  });
+
   statusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right, 100);
   statusBarItem.command = CFG + ".configure";
   context.subscriptions.push(statusBarItem);
@@ -373,4 +384,105 @@ export function deactivate(): void {
   log(`${DISPLAY} extension deactivated.`);
   statusBarItem?.dispose();
   out?.dispose();
+}
+
+async function syncForkConfigs(
+  context: vscode.ExtensionContext,
+  token: string | undefined
+): Promise<void> {
+  const url = cfg<string>("confluenceUrl") ?? "";
+  const username = cfg<string>("username") ?? "";
+  const authMode = cfg<string>("authMode") ?? "bearer";
+  const instanceType = cfg<string>("instanceType") ?? "cloud";
+  const serverPath = context.asAbsolutePath("dist/server.js");
+
+  const homedir = os.homedir();
+  const configFiles: { path: string; isClaude?: boolean; isGemini?: boolean }[] = [];
+
+  // Antigravity
+  configFiles.push({
+    path: path.join(homedir, ".gemini", "antigravity", "mcp_config.json"),
+    isGemini: true
+  });
+  // KIRO
+  configFiles.push({
+    path: path.join(homedir, ".gemini", "kiro", "mcp_config.json"),
+    isGemini: true
+  });
+  // Cursor
+  if (process.platform === "win32") {
+    configFiles.push({
+      path: path.join(process.env.APPDATA || "", "Cursor", "User", "globalStorage", "tongshuai.cursor-chat", "mcp_config.json")
+    });
+  } else if (process.platform === "darwin") {
+    configFiles.push({
+      path: path.join(homedir, "Library", "Application Support", "Cursor", "User", "globalStorage", "tongshuai.cursor-chat", "mcp_config.json")
+    });
+  } else {
+    configFiles.push({
+      path: path.join(homedir, ".config", "Cursor", "User", "globalStorage", "tongshuai.cursor-chat", "mcp_config.json")
+    });
+  }
+  // Claude Desktop
+  if (process.platform === "win32") {
+    configFiles.push({
+      path: path.join(process.env.APPDATA || "", "Claude", "claude_desktop_config.json"),
+      isClaude: true
+    });
+  } else if (process.platform === "darwin") {
+    configFiles.push({
+      path: path.join(homedir, "Library", "Application Support", "Claude", "claude_desktop_config.json"),
+      isClaude: true
+    });
+  }
+
+  for (const item of configFiles) {
+    const dir = path.dirname(item.path);
+    if (!fs.existsSync(dir)) {
+      continue;
+    }
+
+    try {
+      let data: any = {};
+      if (fs.existsSync(item.path)) {
+        try {
+          data = JSON.parse(fs.readFileSync(item.path, "utf8"));
+        } catch (e) {
+          data = {};
+        }
+      }
+
+      if (!data.mcpServers) {
+        data.mcpServers = {};
+      }
+
+      const mcpKey = "confluence-mcp";
+      if (token && url) {
+        data.mcpServers[mcpKey] = {
+          command: process.execPath,
+          args: [serverPath],
+          env: {
+            CONFLUENCE_URL: url,
+            CONFLUENCE_USERNAME: username,
+            CONFLUENCE_AUTH_MODE: authMode,
+            CONFLUENCE_INSTANCE_TYPE: instanceType,
+            CONFLUENCE_TOKEN: token
+          }
+        };
+
+        if (item.isGemini) {
+          data.mcpServers[mcpKey]["$typeName"] = "exa.cascade_plugins_pb.CascadePluginCommandTemplate";
+        }
+      } else {
+        if (data.mcpServers[mcpKey]) {
+          delete data.mcpServers[mcpKey];
+        }
+      }
+
+      fs.writeFileSync(item.path, JSON.stringify(data, null, 2), "utf8");
+      log(`Synced MCP config successfully at: ${item.path}`);
+    } catch (err) {
+      logError(`Failed to sync config at ${item.path}`, err);
+    }
+  }
 }
