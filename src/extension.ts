@@ -296,9 +296,7 @@ export function activate(context: vscode.ExtensionContext): void {
   log(`Platform        : ${process.platform} / Node ${process.version}`);
 
   context.secrets.get(SECRET_KEY).then((token) => {
-    if (token) {
-      void syncForkConfigs(context, token);
-    }
+    void syncForkConfigs(context, token);
   });
 
   statusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right, 100);
@@ -436,6 +434,11 @@ async function syncForkConfigs(
     });
   }
 
+  // Windsurf
+  configFiles.push({
+    path: path.join(homedir, ".codeium", "windsurf", "mcp_config.json")
+  });
+
   for (const item of configFiles) {
     const dir = path.dirname(item.path);
     if (!fs.existsSync(dir)) {
@@ -458,8 +461,9 @@ async function syncForkConfigs(
 
       const mcpKey = "confluence-mcp";
       if (token && url) {
+        const command = vscode.env.remoteName ? process.execPath : "node";
         data.mcpServers[mcpKey] = {
-          command: process.execPath,
+          command: command,
           args: [serverPath],
           env: {
             CONFLUENCE_URL: url,

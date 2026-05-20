@@ -2,7 +2,7 @@
   "name": "confluence-mcp",
   "displayName": "Confluence MCP",
   "description": "Connect any AI assistant to Confluence via MCP. Search, read, create and update pages directly from your AI chat without leaving VS Code.",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "publisher": "SutharLabs",
   "author": "Suresh Suthar <mr.sutharsuresh@gmail.com>",
   "engines": {
@@ -105,7 +105,8 @@
     "watch": "node esbuild.mjs --watch",
     "package": "vsce package --no-dependencies",
     "lint": "eslint src --ext ts",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "vscode:uninstall": "node ./dist/uninstall.js"
   },
   "devDependencies": {
     "@types/node": "^20.0.0",

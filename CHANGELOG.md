@@ -2,6 +2,12 @@
 
 All notable changes to the Confluence MCP project will be documented in this file.
 
+## [1.0.2] — 2026-05-20
+
+### Added
+- **Auto-Sync to Windsurf**: Extended the automatic sync feature to support the Windsurf editor, matching configurations for Antigravity, KIRO, Cursor, and Claude Desktop.
+- **Uninstall Cleanup Script**: Added a clean-up handler (`vscode:uninstall`) that purges credentials and server configurations from all major AI IDE forks and desktop clients when the extension is uninstalled.
+
 ## [1.0.1] — 2026-05-19
 
 ### Fixed

@@ -34,15 +34,28 @@ const serverConfig = {
   },
 };
 
+// Uninstall script bundle (runs during VS Code extension uninstall)
+const uninstallConfig = {
+  ...baseConfig,
+  entryPoints: ["src/uninstall.ts"],
+  outfile: "dist/uninstall.js",
+  platform: "node",
+  format: "cjs",
+  external: [],
+  target: "node18",
+};
+
 if (isDev) {
   const extensionCtx = await esbuild.context(extensionConfig);
   const serverCtx = await esbuild.context(serverConfig);
-  await Promise.all([extensionCtx.watch(), serverCtx.watch()]);
+  const uninstallCtx = await esbuild.context(uninstallConfig);
+  await Promise.all([extensionCtx.watch(), serverCtx.watch(), uninstallCtx.watch()]);
   console.log("Watching for changes...");
 } else {
   await Promise.all([
     esbuild.build(extensionConfig),
     esbuild.build(serverConfig),
+    esbuild.build(uninstallConfig),
   ]);
   console.log("Build complete.");
 }
